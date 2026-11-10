@@ -1,0 +1,624 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Ticket Price Bible</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: mode switcher, then control column beside a ticket-stub result; per-mode detail and Price Bible below */
+:root{
+  --bg:#f3f4f8; --surface:#ffffff; --ink:#161a33; --muted:#5d6385; --line:#dcdfeb;
+  --accent:#3b3fd8; --accent-soft:#e7e8fd; --amber:#c97a00; --amber-soft:#fff2d9;
+  --good:#1e7a4c; --good-soft:#e2f4ea; --bad:#b4342a; --bad-soft:#fbe6e3;
+  --f-display:"Bai Jamjuree","IBM Plex Sans Thai",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans Thai",system-ui,-apple-system,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1122; --surface:#181b31; --ink:#e9eaf6; --muted:#9a9fc2; --line:#2b2f4d;
+  --accent:#8c90ff; --accent-soft:#25285a; --amber:#ffb63d; --amber-soft:#3a2c10;
+  --good:#5fd39a; --good-soft:#123425; --bad:#ff8a7e; --bad-soft:#3d1a17; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1122; --surface:#181b31; --ink:#e9eaf6; --muted:#9a9fc2; --line:#2b2f4d;
+  --accent:#8c90ff; --accent-soft:#25285a; --amber:#ffb63d; --amber-soft:#3a2c10;
+  --good:#5fd39a; --good-soft:#123425; --bad:#ff8a7e; --bad-soft:#3d1a17; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1120px;margin:0 auto;padding-block:32px 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:28px}
+h1,h2{font-family:var(--f-display);margin:0;text-wrap:balance;line-height:1.2}
+h1{font-size:clamp(26px,4vw,34px);font-weight:700}
+h2{font-size:20px;font-weight:600}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.lede{color:var(--muted);max-width:68ch;margin:6px 0 0}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* mode switcher */
+.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:720px){.modes{grid-template-columns:1fr}}
+.mode{font:inherit;color:var(--ink);text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;gap:12px;align-items:flex-start;min-width:0}
+.mode:hover{border-color:var(--accent)}
+.mode .n{font-family:var(--f-mono);font-weight:600;font-size:13px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none}
+.mode b{display:block;font-family:var(--f-display);font-size:15.5px;font-weight:600}
+.mode small{display:block;color:var(--muted);font-size:13px;line-height:1.4;margin-top:2px}
+.mode[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.mode[aria-pressed="true"] .n{background:var(--accent);color:var(--surface)}
+
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:20px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:1fr}}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:20px;min-width:0}
+.field{display:flex;flex-direction:column;gap:8px}
+.field label,.lbl{font-weight:600;font-size:14px}
+.hint{font-size:13px;color:var(--muted)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+select,input[type=number],input[type=text]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
+input[type=number]{font-family:var(--f-mono)}
+select:focus-visible,input:focus-visible,button:focus-visible,[role=button]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 13px var(--f-mono);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 11px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.slider{display:grid;grid-template-columns:1fr 84px;gap:12px;align-items:center}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.pct{position:relative}
+.pct input{padding-right:30px}
+.pct span{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-family:var(--f-mono);font-size:13px}
+.price-src{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:12px 14px;border-radius:10px;background:var(--accent-soft)}
+.price-src .num{font-size:20px;font-weight:600}
+.custom{display:none}
+.custom.on{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px;padding:14px;border:1px dashed var(--accent);border-radius:10px}
+@media (max-width:480px){.custom.on{grid-template-columns:1fr}}
+.custom .field label{font-size:13px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;align-self:flex-start}
+.seg button{font:500 13px var(--f-body);background:var(--surface);color:var(--ink);border:0;padding:7px 14px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+
+/* ticket stub */
+.stub{background:var(--surface);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.stub-top{padding:22px 22px 18px;display:flex;flex-direction:column;gap:6px}
+.stub-artist{font-family:var(--f-display);font-size:18px;font-weight:600}
+.big{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.big .num{font-size:clamp(46px,8vw,64px);font-weight:600;line-height:1;color:var(--accent);letter-spacing:-.02em}
+.big .unit{font-size:16px;color:var(--muted)}
+.perf{position:relative;border-top:2px dashed var(--line);margin:0 14px}
+.perf::before,.perf::after{content:"";position:absolute;top:-12px;width:22px;height:22px;border-radius:50%;background:var(--bg);border:1px solid var(--line)}
+.perf::before{left:-26px}.perf::after{right:-26px}
+.stats{padding:18px 22px 22px;display:grid;grid-template-columns:1fr 1fr;gap:14px 20px}
+@media (max-width:420px){.stats{grid-template-columns:1fr}}
+.stat{display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat .k{font-size:13px;color:var(--muted)}
+.stat .v{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:17px;font-weight:500}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:3px 10px;border-radius:999px;align-self:flex-start}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--amber-soft);color:var(--amber)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.formula{margin:0 22px 22px;padding:12px 14px;border-radius:10px;background:var(--bg);font-family:var(--f-mono);font-size:12.5px;color:var(--muted);overflow-x:auto;white-space:nowrap}
+
+/* tier strip */
+.tiers{display:flex;flex-direction:column;gap:12px}
+.tier-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.tier{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(84px,1fr);min-width:max-content}
+.tier div{padding:10px 12px;border-right:1px solid var(--line);text-align:right;display:flex;flex-direction:column;gap:2px;cursor:pointer}
+.tier div:last-child{border-right:0}
+.tier .cap{font-size:12px;color:var(--muted);font-family:var(--f-mono)}
+.tier .p{font-family:var(--f-mono);font-weight:600;font-size:15px}
+.tier div.cur{background:var(--accent-soft)}
+.tier div.cur .p{color:var(--accent)}
+
+/* artist match list */
+.match{display:flex;flex-direction:column;gap:8px}
+.mrow{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(3,minmax(0,1fr)) auto;gap:12px;align-items:center;padding:12px 16px;background:var(--surface);border:1px solid var(--line);border-radius:12px;border-left:4px solid var(--good)}
+.mrow.no{border-left-color:var(--bad);opacity:.8}
+.mrow .nm{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.mrow .nm small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.mrow .c{display:flex;flex-direction:column;text-align:right;min-width:0}
+.mrow .c span:first-child{font-size:11.5px;color:var(--muted)}
+.mrow .c span:last-child{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:14px}
+.mrow .c .pos{color:var(--good)} .mrow .c .neg{color:var(--bad)}
+.mhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:8px}
+.mhead h3{margin:0;font-family:var(--f-display);font-size:16px}
+@media (max-width:640px){.mrow{grid-template-columns:1fr 1fr}.mrow .nm{grid-column:1/-1}.mrow .pill{grid-column:1/-1}}
+details.more summary{cursor:pointer;color:var(--accent);font-weight:600;padding:6px 0}
+
+/* bible table */
+.bible-head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap}
+.bible-head input{max-width:260px}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface);max-height:620px}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5px}
+th,td{padding:8px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{position:sticky;top:0;background:var(--surface);font-family:var(--f-mono);font-weight:600;font-size:12px;color:var(--muted);z-index:2}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--surface);z-index:1;border-right:1px solid var(--line)}
+th:first-child{z-index:3}
+td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+td:first-child{font-family:var(--f-body);font-weight:500}
+tr.group td{background:var(--bg);font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+tr.group td:first-child{background:var(--bg)}
+tbody tr.art{cursor:pointer}
+tbody tr.art:hover td{background:var(--accent-soft)}
+tr.sel td{background:var(--accent-soft)}
+td.colcur,th.colcur{background:var(--amber-soft);color:var(--ink)}
+tr.sel td.colcur{background:var(--accent);color:var(--surface)}
+td.na{color:var(--muted)}
+tr.custom-row td:first-child{color:var(--accent)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.note{padding:16px 18px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-size:14px;min-width:0}
+.note b{display:block;margin-bottom:4px;font-family:var(--f-display)}
+.note.warn{background:var(--amber-soft);border-color:transparent}
+@media (prefers-reduced-motion:no-preference){.big .num{transition:color .2s}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Price Bible · Sales Team</div>
+    <h1>คำนวณราคาบัตร ขนาดงาน และศิลปินที่รับงานได้</h1>
+    <p class="lede">เลือกสิ่งที่อยากรู้ก่อน แล้วกรอกข้อมูลงาน ระบบคิดจากรายได้ค่าบัตรเทียบกับ Sales Price ของศิลปิน</p>
+  </header>
+
+  <nav class="modes" aria-label="เลือกแบบการคำนวณ">
+    <button type="button" class="mode" data-mode="1" id="mode1"><span class="n">1</span><span><b>หาราคาบัตรขั้นต่ำ</b><small>รู้ศิลปินและ Capacity → ต้องตั้งราคาบัตรอย่างน้อยเท่าไหร่</small></span></button>
+    <button type="button" class="mode" data-mode="2" id="mode2"><span class="n">2</span><span><b>หา Capacity ขั้นต่ำ</b><small>รู้ศิลปินและราคาบัตร → ต้องจัดงานใหญ่อย่างน้อยกี่คน</small></span></button>
+    <button type="button" class="mode" data-mode="3" id="mode3"><span class="n">3</span><span><b>หาศิลปินที่รับงานได้</b><small>รู้ราคาบัตรและ Capacity → ศิลปินคนไหนรับงานนี้ได้ หลังหักกำไรค่าย</small></span></button>
+  </nav>
+
+  <section class="grid">
+    <div class="panel" aria-label="ข้อมูลงาน">
+      <div class="field" id="fLabel">
+        <label for="lf">ค่ายเพลง</label>
+        <select id="lf"></select>
+        <span class="hint" id="lfHint">กรองรายชื่อศิลปินตามค่าย</span>
+      </div>
+
+      <div class="field" id="fArtist">
+        <label for="artist">ศิลปิน / วง</label>
+        <select id="artist"></select>
+        <div class="custom" id="customRow">
+          <div class="field">
+            <label for="cLabel">ค่ายเพลง</label>
+            <select id="cLabel"></select>
+          </div>
+          <div class="field" id="fcLabelOther">
+            <label for="cLabelOther">ชื่อค่าย</label>
+            <input type="text" id="cLabelOther" placeholder="พิมพ์ชื่อค่าย" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="customName">ชื่อศิลปิน / วง</label>
+            <input type="text" id="customName" placeholder="พิมพ์ชื่อศิลปินหรือวง" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="customPrice">Sales Price (บาท)</label>
+            <input type="number" id="customPrice" min="0" step="1000" placeholder="เช่น 300000" inputmode="numeric">
+          </div>
+        </div>
+        <div class="price-src"><span class="hint">Sales Price</span><span class="num" id="priceShow">–</span></div>
+      </div>
+
+      <div class="field" id="fTicket">
+        <label for="tPrice">ราคาบัตร (บาท / ใบ)</label>
+        <input type="number" id="tPrice" min="1" step="1" value="1000" inputmode="numeric" placeholder="เช่น 1200">
+        <div class="chips" id="tChips" role="group" aria-label="ราคาบัตรที่ใช้บ่อย"></div>
+      </div>
+
+      <div class="field" id="fCap">
+        <label for="cap">Venue Capacity (คน)</label>
+        <input type="number" id="cap" min="1" step="1" value="500" inputmode="numeric" placeholder="พิมพ์จำนวนคน เช่น 1800">
+        <span class="hint">พิมพ์จำนวนคนเองได้ทุกตัวเลข หรือกดเลือกขนาดที่ใช้บ่อยด้านล่าง</span>
+        <div class="chips" id="capChips" role="group" aria-label="Capacity ที่ใช้บ่อย"></div>
+      </div>
+
+      <div class="field">
+        <label for="occ">Expected Occupancy</label>
+        <div class="slider">
+          <input type="range" id="occR" min="10" max="100" step="5" value="70" aria-label="Occupancy slider">
+          <div class="pct"><input type="number" id="occ" min="1" max="100" value="70"><span>%</span></div>
+        </div>
+        <span class="hint">ค่าเริ่มต้น 70% ปรับตามความมั่นใจในการขายบัตร</span>
+      </div>
+
+      <div class="field">
+        <label for="alloc">Ticket Revenue Allocated to Artist Fee</label>
+        <div class="slider">
+          <input type="range" id="allocR" min="10" max="100" step="5" value="100" aria-label="Allocation slider">
+          <div class="pct"><input type="number" id="alloc" min="1" max="100" value="100"><span>%</span></div>
+        </div>
+        <span class="hint">100% = ใช้รายได้ค่าบัตรทั้งหมดจ่ายค่าตัว ถ้าต้องกันเงินไว้จ่ายต้นทุนอื่น ให้ลด % ลง</span>
+      </div>
+
+      <div class="field" id="fProfit">
+        <label for="mVal">กำไรที่ค่ายต้องการ (บวกเพิ่มจาก Sales Price)</label>
+        <div class="seg" role="group" aria-label="หน่วยกำไร">
+          <button type="button" data-mt="pct" id="mtPct">% ของ Sales Price</button>
+          <button type="button" data-mt="thb" id="mtThb">จำนวนเงิน (บาท)</button>
+        </div>
+        <div class="pct"><input type="number" id="mVal" min="0" step="1" value="20" inputmode="numeric"><span id="mUnit">%</span></div>
+        <span class="hint" id="mHint">ศิลปินจะรับงานได้เมื่อรายได้ค่าบัตร ≥ Sales Price + กำไรที่ค่ายต้องการ</span>
+      </div>
+    </div>
+
+    <!-- Mode 1 result -->
+    <div class="stub" aria-live="polite" id="out1">
+      <div class="stub-top">
+        <div class="eyebrow">ราคาบัตรแนะนำ (ต่อใบ)</div>
+        <div class="stub-artist" id="rArtist">–</div>
+        <div class="big"><span class="num" id="rSuggest">–</span><span class="unit">บาท</span></div>
+        <div id="rPill"></div>
+      </div>
+      <div class="perf" aria-hidden="true"></div>
+      <div class="stats">
+        <div class="stat"><span class="k">บัตรที่คาดว่าจะขายได้</span><span class="v" id="rSold">–</span></div>
+        <div class="stat"><span class="k">ราคาขั้นต่ำ (ไม่ปัด)</span><span class="v" id="rExact">–</span></div>
+        <div class="stat"><span class="k">รายได้ค่าบัตรรวม</span><span class="v" id="rGross">–</span></div>
+        <div class="stat"><span class="k">ส่วนเกินหลังจ่าย Sales Price</span><span class="v" id="rSurplus">–</span></div>
+      </div>
+      <div class="formula" id="rFormula">–</div>
+    </div>
+
+    <!-- Mode 2 result -->
+    <div class="stub" aria-live="polite" id="out2" hidden>
+      <div class="stub-top">
+        <div class="eyebrow">Capacity ขั้นต่ำ</div>
+        <div class="stub-artist" id="cArtist">–</div>
+        <div class="big"><span class="num" id="cMin">–</span><span class="unit">คน</span></div>
+        <div id="cPill"></div>
+      </div>
+      <div class="perf" aria-hidden="true"></div>
+      <div class="stats">
+        <div class="stat"><span class="k">บัตรที่ต้องขายให้ได้</span><span class="v" id="cTickets">–</span></div>
+        <div class="stat"><span class="k">ขนาดงานมาตรฐานที่ใกล้ที่สุด</span><span class="v" id="cVenue">–</span></div>
+        <div class="stat"><span class="k">รายได้ค่าบัตรที่ Capacity ขั้นต่ำ</span><span class="v" id="cGross">–</span></div>
+        <div class="stat"><span class="k">ส่วนเกินหลังจ่าย Sales Price</span><span class="v" id="cSurplus">–</span></div>
+      </div>
+      <div class="formula" id="cFormula">–</div>
+    </div>
+
+    <!-- Mode 3 result -->
+    <div class="stub" aria-live="polite" id="out3" hidden>
+      <div class="stub-top">
+        <div class="eyebrow">ศิลปินที่รับงานนี้ได้</div>
+        <div class="stub-artist" id="mEvent">–</div>
+        <div class="big"><span class="num" id="mCount">–</span><span class="unit" id="mOf">ศิลปิน</span></div>
+        <div id="mPill"></div>
+      </div>
+      <div class="perf" aria-hidden="true"></div>
+      <div class="stats">
+        <div class="stat"><span class="k">บัตรที่คาดว่าจะขายได้</span><span class="v" id="mSold">–</span></div>
+        <div class="stat"><span class="k">รายได้ค่าบัตรที่ใช้จ่ายค่าตัว</span><span class="v" id="mBudget">–</span></div>
+        <div class="stat"><span class="k">Sales Price สูงสุดที่รับได้</span><span class="v" id="mMax">–</span></div>
+        <div class="stat"><span class="k">กำไรค่ายที่ตั้งไว้</span><span class="v" id="mTarget">–</span></div>
+      </div>
+      <div class="formula" id="mFormula">–</div>
+    </div>
+  </section>
+
+  <section class="tiers" id="secTier">
+    <div>
+      <h2 id="tTitle">–</h2>
+      <p class="hint" style="margin:4px 0 0" id="tHint">–</p>
+    </div>
+    <div class="tier-wrap"><div class="tier" id="tier"></div></div>
+  </section>
+
+  <section class="tiers" id="secMatch" hidden>
+    <div>
+      <h2>รายชื่อศิลปินเทียบกับงานนี้</h2>
+      <p class="hint" style="margin:4px 0 0">เรียงจาก Sales Price สูงไปต่ำ “เหลือ” คือรายได้ที่เกินจาก Sales Price + กำไรที่ค่ายต้องการ</p>
+    </div>
+    <div class="mhead"><h3 id="okHead">รับงานได้</h3></div>
+    <div class="match" id="okList"></div>
+    <details class="more" id="noWrap"><summary id="noHead">ยังไม่พอ</summary><div class="match" id="noList"></div></details>
+  </section>
+
+  <section class="tiers" id="secBible">
+    <div class="bible-head">
+      <div>
+        <h2>Price Bible ศิลปินทุกคน</h2>
+        <p class="hint" style="margin:4px 0 0">ราคาบัตรขั้นต่ำต่อใบ (บาท) ที่ Occupancy <span class="num" id="bOcc">70%</span> · Allocation <span class="num" id="bAlloc">100%</span> คลิกแถวเพื่อเลือกศิลปิน</p>
+      </div>
+      <input type="text" id="search" placeholder="ค้นหาศิลปิน" aria-label="ค้นหาศิลปิน">
+    </div>
+    <div class="tbl-wrap"><table id="bible"></table></div>
+  </section>
+
+  <section class="notes">
+    <div class="note warn"><b>ไม่ใช่ราคาคุ้มทุนของทั้งงาน</b>ตัวเลขนี้ครอบคลุมเฉพาะ Sales Price ของศิลปิน (และกำไรค่ายในแบบที่ 3) ยังไม่รวม Venue, Production, Marketing, Ticketing Fee, VAT/ภาษี, ค่าลิขสิทธิ์ และต้นทุนอื่น</div>
+    <div class="note"><b>สูตรที่ใช้</b>บัตรที่ขายได้ = Capacity × Occupancy<br>รายได้ที่ใช้จ่ายค่าตัว = บัตรที่ขายได้ × ราคาบัตร × Allocation<br>แบบ 1 ปัดราคาขึ้นทีละ 50 บาท · แบบ 2 ปัด Capacity ขึ้นเป็นคนเต็ม</div>
+    <div class="note"><b>ที่มาของข้อมูล</b>Sales Price และค่ายเพลงจากชีต Artist Database ในไฟล์ Artist Ticket Minimum Price Bible ศิลปินที่ไม่อยู่ในรายชื่อหรือยังไม่มี Sales Price ให้เลือก “อื่นๆ” แล้วกรอกชื่อและ Sales Price เอง</div>
+  </section>
+</div>
+
+<script>
+const ARTISTS=[
+ {g:"BRIDGE",n:"Three Man Down",p:260000},
+ {g:"BRIDGE",n:"Taitosmith",p:350000},
+ {g:"BRIDGE",n:"Tilly Birds",p:208650},
+ {g:"BRIDGE",n:"ASIA7",p:80000},
+ {g:"BRIDGE",n:"The Darkest Romance",p:70000},
+ {g:"BRIDGE",n:"FAMOSO",p:30000},
+ {g:"BRIDGE",n:"ADORA",p:40000},
+ {g:"BRIDGE",n:"HARD BOY",p:45000},
+ {g:"BRIDGE",n:"NINEOKMAI",p:55000},
+ {g:"BRIDGE",n:"MILLER",p:40000},
+ {g:"BRIDGE",n:"INDIGO",p:150000},
+ {g:"BRIDGE",n:"FLURE",p:200000},
+ {g:"BRIDGE",n:"AYLA'S",p:90000},
+ {g:"BRIDGE",n:"PAR-T",p:40000},
+ {g:"BRIDGE",n:"DENA EUPRASERT",p:40000},
+ {g:"BRIDGE",n:"QEETHA",p:45000},
+ {g:"BRIDGE",n:"AYEJAY",p:40000},
+ {g:"BRIDGE",n:"FIT AROON",p:45000},
+ {g:"BRIDGE",n:"JIGSAW STORY",p:60000},
+ {g:"BRIDGE",n:"TUF",p:null},
+ {g:"BRIDGE",n:"B4R (Special Project)",p:null},
+ {g:"9Arkkhan",n:"Little John",p:170000},
+ {g:"9Arkkhan",n:"Manutsawee",p:120000},
+ {g:"9Arkkhan",n:"Samarn",p:65000},
+ {g:"9Arkkhan",n:"Vichitchon",p:45000},
+ {g:"9Arkkhan",n:"Manop",p:45000},
+ {g:"9Arkkhan",n:"Gandharva",p:45000},
+ {g:"9Arkkhan",n:"Pinkie",p:45000},
+ {g:"9Arkkhan",n:"Dale",p:45000},
+ {g:"MACHg",n:"PRANG PRANGTHIP",p:120000},
+ {g:"MACHg",n:"GOLLKY",p:50000},
+ {g:"MACHg",n:"NOOM JAISAEN",p:45000},
+ {g:"MACHg",n:"Chachom",p:45000},
+ {g:"MACHg",n:"View Valnika",p:45000},
+ {g:"MACHg",n:"BENZ PLIKTHAI",p:208650},
+ {g:"MACHg",n:"Bunsunan",p:null}
+];
+const CAPS=[50,100,200,300,400,500,600,700,800,900,1000,1100,1200,1500,2000,2500,3000,3500,4000,4500,5000];
+const TPRICES=[300,500,800,1000,1200,1500,2000,2500,3000];
+const $=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString("en-US");
+const fmt2=n=>n.toLocaleString("en-US",{maximumFractionDigits:2});
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const EPS=1e-9;
+
+// Mode 1 — same maths as the spreadsheet: ROUNDUP(price/(sold*alloc),0), then ROUNDUP(/50)*50
+function calc(price,cap,occ,alloc){
+  const sold=cap*occ;
+  if(!price||!(sold>0)||!(alloc>0))return null;
+  const raw=price/(sold*alloc);
+  const exact=Math.ceil(raw-EPS);
+  const suggest=Math.ceil(raw/50-EPS)*50;
+  const gross=sold*suggest;
+  return {sold,raw,exact,suggest,gross,surplus:gross*alloc-price};
+}
+// Mode 2 — smallest whole-person capacity whose expected ticket revenue covers the Sales Price
+function calcCap(price,t,occ,alloc){
+  if(!price||!(t>0)||!(occ>0)||!(alloc>0))return null;
+  const tickets=Math.ceil(price/(t*alloc)-EPS);
+  const minCap=Math.ceil(price/(t*occ*alloc)-EPS);
+  const sold=minCap*occ, gross=sold*t;
+  const venue=CAPS.find(c=>c>=minCap)||null;
+  return {tickets,minCap,sold,gross,surplus:gross*alloc-price,venue};
+}
+// Mode 3 — budget from tickets, compared with each artist's Sales Price + label profit
+function budgetOf(t,cap,occ,alloc){return t*cap*occ*alloc}
+function profitFor(price){return st.mType==="pct"?price*st.mVal/100:st.mVal}
+function maxSales(budget){return st.mType==="pct"?budget/(1+st.mVal/100):budget-st.mVal}
+
+const LABELS=["BRIDGE","9Arkkhan","MACHg","ENNEAD","Other"];
+const st={mode:1,lf:"all",cLabel:"BRIDGE",cLabelOther:"",i:0,custom:false,cName:"",cPrice:"",cap:500,tPrice:1000,occ:.7,alloc:1,mType:"pct",mVal:20};
+function load(){try{const s=JSON.parse(localStorage.getItem("tpb")||"null");if(s)Object.assign(st,s);}catch(e){}}
+function save(){try{localStorage.setItem("tpb",JSON.stringify(st));}catch(e){}}
+const HASH={1:"min-price",2:"min-capacity",3:"artist-match"};
+function modeFromHash(){const h=location.hash.slice(1);for(const k in HASH)if(HASH[k]===h)return +k;return null}
+
+function price(){
+  if(st.custom){const v=parseFloat(st.cPrice);return v>0?v:null;}
+  return ARTISTS[st.i].p;
+}
+function customName(){return st.cName.trim()||"ศิลปิน/วง อื่นๆ"}
+function customLabel(){return st.cLabel==="Other"?(st.cLabelOther.trim()||"Other"):st.cLabel}
+const inLabel=g=>st.lf==="all"||g===st.lf;
+const customIn=()=>inLabel(st.cLabel);
+function pool(){ // every artist with a Sales Price in the chosen label, plus the custom one
+  const list=ARTISTS.filter(a=>a.p&&inLabel(a.g)).map(a=>({n:a.n,g:a.g,p:a.p}));
+  const cp=parseFloat(st.cPrice);
+  if(cp>0&&customIn())list.push({n:customName(),g:customLabel()+" · กรอกเอง",p:cp,custom:true});
+  return list;
+}
+
+function buildLabels(){
+  const cnt=l=>ARTISTS.filter(a=>a.g===l).length;
+  $("lf").innerHTML=`<option value="all">ทุกค่าย (${ARTISTS.length})</option>`+
+    LABELS.map(l=>`<option value="${l}">${l==="Other"?"Other (ค่ายอื่นที่กรอกเอง)":l}${cnt(l)?` (${cnt(l)})`:""}</option>`).join("");
+  $("cLabel").innerHTML=LABELS.map(l=>`<option value="${l}">${l==="Other"?"Other (กรอกชื่อค่าย)":l}</option>`).join("");
+}
+function buildSelect(){
+  const sel=$("artist");let html="",g=null;
+  ARTISTS.forEach((a,i)=>{
+    if(!inLabel(a.g))return;
+    if(a.g!==g){if(g)html+="</optgroup>";html+=`<optgroup label="${a.g}">`;g=a.g;}
+    html+=`<option value="${i}">${esc(a.n)}${a.p?"  ·  "+fmt(a.p):"  ·  ไม่มี Sales Price"}</option>`;
+  });
+  if(g)html+="</optgroup>";
+  sel.innerHTML=html+`<optgroup label="อื่นๆ"><option value="other">อื่นๆ (กรอกชื่อและ Sales Price เอง)</option></optgroup>`;
+}
+// keep the selected artist inside the label filter
+function syncSelection(){
+  if(st.custom){if(!customIn()&&st.lf!=="all"){const j=ARTISTS.findIndex(a=>a.g===st.lf);if(j>=0){st.i=j;st.custom=false;}else st.cLabel=st.lf;}return;}
+  if(inLabel(ARTISTS[st.i].g))return;
+  const j=ARTISTS.findIndex(a=>inLabel(a.g));
+  if(j>=0)st.i=j;else{st.custom=true;st.cLabel=st.lf;}
+}
+function buildChips(){
+  $("capChips").innerHTML=CAPS.map(c=>`<button type="button" class="chip" data-cap="${c}">${fmt(c)}</button>`).join("");
+  $("tChips").innerHTML=TPRICES.map(c=>`<button type="button" class="chip" data-t="${c}">${fmt(c)}</button>`).join("");
+}
+const keep=(id,v)=>{if(document.activeElement!==$(id))$(id).value=v};
+
+function render(){
+  const m=st.mode, a=ARTISTS[st.i], p=price(), name=st.custom?`${customName()} (${customLabel()})`:`${a.n} (${a.g})`;
+  const o=Math.round(st.occ*100),al=Math.round(st.alloc*100);
+
+  document.querySelectorAll(".mode").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.mode===m));
+  $("fArtist").hidden=m===3&&!st.custom; $("fTicket").hidden=m===1; $("fCap").hidden=m===2; $("fProfit").hidden=m!==3;
+  $("out1").hidden=m!==1; $("out2").hidden=m!==2; $("out3").hidden=m!==3;
+  $("secTier").hidden=m===3; $("secMatch").hidden=m!==3; $("secBible").hidden=m===3;
+
+  $("lf").value=st.lf;
+  const nIn=ARTISTS.filter(x=>inLabel(x.g)).length;
+  $("lfHint").textContent=st.lf==="all"?"กรองรายชื่อศิลปินตามค่าย":nIn?`แสดงเฉพาะศิลปินค่าย ${st.lf} (${nIn} รายชื่อ) และศิลปินที่กรอกเองในค่ายนี้`:`ยังไม่มีศิลปินค่าย ${st.lf} ในไฟล์ เลือก “อื่นๆ” แล้วกรอกชื่อและ Sales Price เอง`;
+  $("artist").value=st.custom?"other":st.i;
+  $("customRow").classList.toggle("on",st.custom);
+  $("cLabel").value=st.cLabel; $("fcLabelOther").hidden=st.cLabel!=="Other";
+  keep("cLabelOther",st.cLabelOther);
+  keep("customName",st.cName); keep("customPrice",st.cPrice);
+  $("priceShow").textContent=p?fmt(p)+" ฿":"ไม่มีข้อมูล";
+  keep("cap",st.cap); keep("tPrice",st.tPrice);
+  $("occR").value=o; keep("occ",o); $("allocR").value=al; keep("alloc",al);
+  keep("mVal",st.mVal);
+  $("mtPct").setAttribute("aria-pressed",st.mType==="pct"); $("mtThb").setAttribute("aria-pressed",st.mType==="thb");
+  $("mUnit").textContent=st.mType==="pct"?"%":"฿";
+  document.querySelectorAll("#capChips .chip").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.cap===st.cap));
+  document.querySelectorAll("#tChips .chip").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.t===st.tPrice));
+  const noPrice=st.custom?"กรอก Sales Price เพื่อคำนวณ":"ศิลปินนี้ยังไม่มี Sales Price เลือก “อื่นๆ” แล้วกรอก Sales Price เอง";
+
+  if(m===1){
+    $("rArtist").textContent=name;
+    const r=calc(p,st.cap,st.occ,st.alloc);
+    if(!r){
+      $("rSuggest").textContent="–";["rSold","rExact","rGross","rSurplus"].forEach(k=>$(k).textContent="–");
+      $("rPill").innerHTML=`<span class="pill warn">${p?"ใส่ Capacity, Occupancy และ Allocation ให้มากกว่า 0":noPrice}</span>`;
+      $("rFormula").textContent="–";
+    }else{
+      $("rSuggest").textContent=fmt(r.suggest);
+      $("rSold").textContent=fmt2(r.sold)+" ใบ";
+      $("rExact").textContent=fmt(r.exact)+" ฿";
+      $("rGross").textContent=fmt(r.gross)+" ฿";
+      $("rSurplus").textContent=(r.surplus>=0?"+":"")+fmt(r.surplus)+" ฿";
+      $("rPill").innerHTML=`<span class="pill good">ขาย ${fmt2(r.sold)} ใบ × ${fmt(r.suggest)} ฿ ครอบคลุมค่าตัวแล้ว</span>`;
+      $("rFormula").textContent=`${fmt(p)} ÷ (${fmt(st.cap)} × ${o}% × ${al}%) = ${fmt2(r.raw)} → ปัดขึ้น ${fmt(r.suggest)} ฿`;
+    }
+    const caps=CAPS.includes(st.cap)||!(st.cap>0)?CAPS:[...CAPS,st.cap].sort((x,y)=>x-y);
+    $("tTitle").textContent=`ราคาขั้นต่ำของ ${name} ในแต่ละขนาดงาน`;
+    $("tHint").textContent="ใช้ Occupancy และ Allocation เดียวกับด้านบน คลิกช่องเพื่อเลือก Capacity นั้น";
+    $("tier").innerHTML=caps.map(c=>{const t=calc(p,c,st.occ,st.alloc);
+      return `<div class="${c===st.cap?"cur":""}" data-cap="${c}" role="button" tabindex="0"><span class="cap">${fmt(c)} คน</span><span class="p">${t?fmt(t.suggest)+" ฿":"–"}</span></div>`}).join("");
+  }
+
+  if(m===2){
+    $("cArtist").textContent=`${name} · บัตรใบละ ${st.tPrice>0?fmt(st.tPrice):"–"} ฿`;
+    const r=calcCap(p,st.tPrice,st.occ,st.alloc);
+    if(!r){
+      $("cMin").textContent="–";["cTickets","cVenue","cGross","cSurplus"].forEach(k=>$(k).textContent="–");
+      $("cPill").innerHTML=`<span class="pill warn">${p?"ใส่ราคาบัตร, Occupancy และ Allocation ให้มากกว่า 0":noPrice}</span>`;
+      $("cFormula").textContent="–";
+    }else{
+      $("cMin").textContent=fmt(r.minCap);
+      $("cTickets").textContent=fmt(r.tickets)+" ใบ";
+      $("cVenue").textContent=r.venue?fmt(r.venue)+" คน":"เกิน 5,000 คน";
+      $("cGross").textContent=fmt(r.gross)+" ฿";
+      $("cSurplus").textContent=(r.surplus>=0?"+":"")+fmt(r.surplus)+" ฿";
+      $("cPill").innerHTML=r.minCap>5000
+        ?`<span class="pill bad">ต้องใช้งานใหญ่กว่า 5,000 คน ลองขึ้นราคาบัตรหรือเพิ่ม Occupancy</span>`
+        :`<span class="pill good">จัดงานตั้งแต่ ${fmt(r.minCap)} คนขึ้นไป ขายได้ ${o}% ก็ครอบคลุมค่าตัว</span>`;
+      $("cFormula").textContent=`${fmt(p)} ÷ (${fmt(st.tPrice)} × ${o}% × ${al}%) = ${fmt2(p/(st.tPrice*st.occ*st.alloc))} → ปัดขึ้น ${fmt(r.minCap)} คน`;
+    }
+    $("tTitle").textContent=`Capacity ขั้นต่ำของ ${name} ในแต่ละราคาบัตร`;
+    $("tHint").textContent="ใช้ Occupancy และ Allocation เดียวกับด้านบน คลิกช่องเพื่อเลือกราคาบัตรนั้น";
+    const ts=TPRICES.includes(st.tPrice)||!(st.tPrice>0)?TPRICES:[...TPRICES,st.tPrice].sort((x,y)=>x-y);
+    $("tier").innerHTML=ts.map(t=>{const r2=calcCap(p,t,st.occ,st.alloc);
+      return `<div class="${t===st.tPrice?"cur":""}" data-t="${t}" role="button" tabindex="0"><span class="cap">บัตร ${fmt(t)} ฿</span><span class="p">${r2?fmt(r2.minCap)+" คน":"–"}</span></div>`}).join("");
+  }
+
+  if(m===3){
+    const sold=st.cap*st.occ, budget=budgetOf(st.tPrice,st.cap,st.occ,st.alloc);
+    const valid=st.tPrice>0&&st.cap>0&&st.occ>0&&st.alloc>0;
+    $("mEvent").textContent=`บัตร ${st.tPrice>0?fmt(st.tPrice):"–"} ฿ · ${st.cap>0?fmt(st.cap):"–"} คน · ${st.lf==="all"?"ทุกค่าย":"ค่าย "+st.lf}`;
+    const list=pool().map(x=>{const need=x.p+profitFor(x.p);return {...x,need,left:budget-need,profit:budget-x.p}}).sort((x,y)=>y.p-x.p);
+    const ok=list.filter(x=>valid&&x.left>=-EPS), no=list.filter(x=>!(valid&&x.left>=-EPS));
+    const mx=maxSales(budget);
+    $("mCount").textContent=valid?ok.length:"–";
+    $("mOf").textContent=`จาก ${list.length} ศิลปิน`;
+    $("mSold").textContent=valid?fmt2(sold)+" ใบ":"–";
+    $("mBudget").textContent=valid?fmt(budget)+" ฿":"–";
+    $("mMax").textContent=valid?(mx>0?fmt(Math.floor(mx))+" ฿":"ไม่พอ"):"–";
+    $("mTarget").textContent=st.mType==="pct"?`${fmt2(st.mVal)}% ของ Sales Price`:`${fmt(st.mVal)} ฿ ต่องาน`;
+    $("mPill").innerHTML=!valid?`<span class="pill warn">ใส่ราคาบัตร, Capacity, Occupancy และ Allocation ให้มากกว่า 0</span>`
+      :ok.length?`<span class="pill good">รับได้ถึง ${esc(ok[0].n)} (Sales Price ${fmt(ok[0].p)} ฿)</span>`
+      :`<span class="pill bad">ยังไม่มีศิลปินที่รับได้ ลองขึ้นราคาบัตร เพิ่ม Capacity หรือลดกำไรค่าย</span>`;
+    $("mFormula").textContent=valid?`${fmt(st.tPrice)} × ${fmt(st.cap)} × ${o}% × ${al}% = ${fmt(budget)} ฿ ${st.mType==="pct"?"÷ (1 + "+fmt2(st.mVal)+"%)":"− "+fmt(st.mVal)+" ฿"} = Sales Price สูงสุด ${mx>0?fmt(Math.floor(mx)):"0"} ฿`:"–";
+    const row=(x,good)=>`<div class="mrow ${good?"":"no"}">
+      <div class="nm">${esc(x.n)}<small>${esc(x.g)}</small></div>
+      <div class="c"><span>Sales Price</span><span>${fmt(x.p)}</span></div>
+      <div class="c"><span>กำไรค่ายจริง</span><span>${valid?fmt(x.profit):"–"}</span></div>
+      <div class="c"><span>${good?"เหลือ":"ขาดอีก"}</span><span class="${good?"pos":"neg"}">${valid?(good?"+":"")+fmt(x.left):"–"}</span></div>
+      <span class="pill ${good?"good":"bad"}">${good?"รับได้":"ยังไม่พอ"}</span></div>`;
+    $("okHead").textContent=`รับงานได้ (${ok.length})`;
+    $("okList").innerHTML=ok.length?ok.map(x=>row(x,true)).join(""):`<p class="hint">ยังไม่มีศิลปินที่รายได้ค่าบัตรครอบคลุม Sales Price + กำไรค่าย</p>`;
+    $("noHead").textContent=`ยังไม่พอ (${no.length})`;
+    $("noList").innerHTML=no.map(x=>row(x,false)).join("");
+    $("noWrap").hidden=!no.length;
+  }
+
+  $("bOcc").textContent=o+"%"; $("bAlloc").textContent=al+"%";
+  if(m!==3)renderBible();
+  save();
+}
+
+function renderBible(){
+  const q=$("search").value.trim().toLowerCase();
+  const hl=st.mode===1?st.cap:null;
+  const caps=hl&&hl>0&&!CAPS.includes(hl)?[...CAPS,hl].sort((x,y)=>x-y):CAPS;
+  let h=`<thead><tr><th>ศิลปิน</th><th>Sales Price</th>${caps.map(c=>`<th class="${c===hl?"colcur":""}">${fmt(c)}</th>`).join("")}</tr></thead><tbody>`;
+  let g=null;
+  const cp=st.custom&&customIn()?price():null, cn=customName();
+  if(cp&&(!q||cn.toLowerCase().includes(q))){
+    h+=`<tr class="group"><td>${esc(customLabel())} · กรอกเอง</td><td colspan="${caps.length+1}"></td></tr>`+
+      `<tr class="art sel custom-row" data-other="1"><td>${esc(cn)}</td><td>${fmt(cp)}</td>`+
+      caps.map(c=>{const r=calc(cp,c,st.occ,st.alloc);return `<td class="${c===hl?"colcur":""}">${r?fmt(r.suggest):"–"}</td>`}).join("")+"</tr>";
+  }
+  ARTISTS.forEach((a,i)=>{
+    if(!inLabel(a.g)||(q&&!a.n.toLowerCase().includes(q)))return;
+    if(a.g!==g){g=a.g;h+=`<tr class="group"><td>${g}</td><td colspan="${caps.length+1}"></td></tr>`;}
+    h+=`<tr class="art ${!st.custom&&i===st.i?"sel":""}" data-i="${i}"><td>${esc(a.n)}</td><td class="${a.p?"":"na"}">${a.p?fmt(a.p):"–"}</td>`+
+      caps.map(c=>{const r=calc(a.p,c,st.occ,st.alloc);return `<td class="${c===hl?"colcur":""} ${r?"":"na"}">${r?fmt(r.suggest):"–"}</td>`}).join("")+"</tr>";
+  });
+  $("bible").innerHTML=h+"</tbody>";
+}
+
+function setMode(m){st.mode=m;try{history.replaceState(null,"","#"+HASH[m])}catch(e){location.hash=HASH[m]}render()}
+function clampPct(v){v=parseFloat(v);return v>0?Math.min(v,100)/100:0}
+load(); {const hm=modeFromHash();if(hm)st.mode=hm;}
+if(!ARTISTS[st.i])st.i=0;
+if(st.lf!=="all"&&!LABELS.includes(st.lf))st.lf="all";
+if(!LABELS.includes(st.cLabel))st.cLabel="BRIDGE";
+buildLabels(); syncSelection(); buildSelect(); buildChips();
+$("lf").addEventListener("change",e=>{st.lf=e.target.value;syncSelection();buildSelect();render()});
+$("cLabel").addEventListener("change",e=>{st.cLabel=e.target.value;
+  if(!customIn()){st.lf="all";buildSelect();}
+  render();if(st.cLabel==="Other")$("cLabelOther").focus();});
+$("cLabelOther").addEventListener("input",e=>{st.cLabelOther=e.target.value;render()});
+document.querySelectorAll(".mode").forEach(b=>b.addEventListener("click",()=>setMode(+b.dataset.mode)));
+window.addEventListener("hashchange",()=>{const hm=modeFromHash();if(hm&&hm!==st.mode){st.mode=hm;render()}});
+$("artist").addEventListener("change",e=>{
+  if(e.target.value==="other"){st.custom=true;if(st.lf!=="all")st.cLabel=st.lf;render();$("customName").focus();}
+  else{st.i=+e.target.value;st.custom=false;render();}
+});
+$("customName").addEventListener("input",e=>{st.cName=e.target.value;render()});
+$("customPrice").addEventListener("input",e=>{st.cPrice=e.target.value;render()});
+$("cap").addEventListener("input",e=>{st.cap=Math.max(0,parseInt(e.target.value)||0);render()});
+$("tPrice").addEventListener("input",e=>{st.tPrice=Math.max(0,parseFloat(e.target.value)||0);render()});
+$("capChips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(b){st.cap=+b.dataset.cap;render()}});
+$("tChips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(b){st.tPrice=+b.dataset.t;render()}});
+$("occR").addEventListener("input",e=>{st.occ=e.target.value/100;render()});
+$("occ").addEventListener("input",e=>{st.occ=clampPct(e.target.value);render()});
+$("allocR").addEventListener("input",e=>{st.alloc=e.target.value/100;render()});
+$("alloc").addEventListener("input",e=>{st.alloc=clampPct(e.target.value);render()});
+document.querySelectorAll("[data-mt]").forEach(b=>b.addEventListener("click",()=>{
+  if(st.mType===b.dataset.mt)return; st.mType=b.dataset.mt; st.mVal=st.mType==="pct"?20:20000; render();}));
+$("mVal").addEventListener("input",e=>{st.mVal=Math.max(0,parseFloat(e.target.value)||0);render()});
+const pickTier=e=>{const d=e.target.closest("[data-cap],[data-t]");if(!d)return;
+  if(d.dataset.cap)st.cap=+d.dataset.cap;else st.tPrice=+d.dataset.t;render()};
+$("tier").addEventListener("click",pickTier);
+$("tier").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pickTier(e)}});
+$("bible").addEventListener("click",e=>{const tr=e.target.closest("tr.art");if(tr){if(tr.dataset.other)st.custom=true;else{st.i=+tr.dataset.i;st.custom=false;}render();window.scrollTo({top:0,behavior:"smooth"})}});
+$("search").addEventListener("input",renderBible);
+render();
+</script>
+
+</body></html>
